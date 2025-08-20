@@ -21,31 +21,19 @@ int main(void)
 
     while (1)
     {
-        /* Prompt */
-        write(STDOUT_FILENO, "#cisfun$ ", 9);
+	    if (isatty(STDIN_FILENO))
+		    write(STDOUT_FILENO, "#cisfun$ ", 9);
 
-        /* Read input */
         nread = getline(&line, &len, stdin);
-
-        if (nread == -1)
+	if (nread == -1)
         {
-            /* Handle Ctrl+D (EOF) */
-            if (feof(stdin))
-            {
                 write(STDOUT_FILENO, "\n", 1);
                 break;
             }
-            perror("getline");
-            continue;
-        }
 
-        /* Remove newline */
+
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
-
-        /* Skip empty input */
-        if (line[0] == '\0')
-            continue;
 
         pid = fork();
         if (pid == -1)
@@ -60,6 +48,7 @@ int main(void)
 
             argv[0] = line;
 	    argv[1] = NULL;
+
             if (execve(line, argv, environ) == -1)
             {
                 perror("./shell");
