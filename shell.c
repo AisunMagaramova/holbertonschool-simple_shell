@@ -56,9 +56,10 @@ int main(void)
 
         if (pid == 0)
         {
-            char *argv[] = {line, NULL};
+            char *argv[2];
 
-            /* Try to execute command */
+            argv[0] = line;
+	    argv[1] = NULL;
             if (execve(line, argv, environ) == -1)
             {
                 perror("./shell");
