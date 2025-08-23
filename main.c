@@ -14,42 +14,41 @@ int main(void)
     int status;
 
     while (1)
+{
+    printf("#cisfun$ ");
+    nread = getline(&line, &len, stdin);
+    if (nread == -1)  // EOF və ya error
     {
-        printf("#cisfun$ ");
-        nread = getline(&line, &len, stdin);
+        printf("\n");
+        free(line);
+        exit(EXIT_SUCCESS);
+    }
 
-        if (nread == -1) /* EOF or error */
-        {
-            putchar('\n');
-            break;
-        }
+    if (line[nread - 1] == '\n')
+        line[nread - 1] = '\0';
 
-        if (line[nread - 1] == '\n')
-            line[nread - 1] = '\0';
+    if (strlen(line) == 0)
+        continue;  // boş sətir olduqda promptu yenidən göstər
 
-        pid = fork();
-        if (pid == -1)
+    pid = fork();
+    if (pid == -1)
+    {
+        perror("fork");
+        free(line);
+        exit(EXIT_FAILURE);
+    }
+    if (pid == 0)
+    {
+        char *args[] = {line, NULL};
+        if (execve(args[0], args, environ) == -1)
         {
-            perror("fork");
-            free(line);
-            exit(EXIT_FAILURE);
-        }
-        if (pid == 0) /* child */
-        {
-            char *args[2];
-            args[0] = line;
-            args[1] = NULL;
-            execve(args[0], args, environ);
-            /* if execve fails */
             perror("./shell");
             free(line);
             exit(EXIT_FAILURE);
         }
-        else /* parent */
-        {
-            waitpid(pid, &status, 0);
-        }
     }
-    free(line);
-    return (0);
+    else
+    {
+        waitpid(pid, &status, 0);
+    }
 }
