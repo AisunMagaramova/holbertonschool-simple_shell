@@ -8,6 +8,7 @@
  * main - simple shell
  * Return: 0
  */
+extern char **environ;
 int main(void)
 {
 	char *line = NULL;
@@ -16,48 +17,42 @@ int main(void)
 	pid_t pid;
 	char *argv[2];
 	int status;
-
+	
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-			write(1, "#cisfun$ ", 9);
+		printf("#cisfun$ ");
+		fflush(stdout);
 
-		nread = getline(&line, &len, stdin);
-		if (nread == -1)
+		read = getline(&line, &len, stdin);
+		if (read == -1)
 		{
-			free(line);
-			write(1, "\n", 1);
+			printf("\n");
 			break;
 		}
 
-		if (line[nread - 1] == '\n')
-			line[nread - 1] = '\0';
-		
-		if (line[0] == '\0')
-			continue;
-		
-		argv[0] = line;
-		argv[1] = NULL;
+		if (line[read - 1] == '\n')
+			line[read - 1] = '\0';
 
 		pid = fork();
-		if (pid == -1)
-		{
-			perror("fork");
-			free(line);
-			exit(EXIT_FAILURE);
-		}
-
 		if (pid == 0)
 		{
-			
-			if (execve(argv[0], argv, NULL) == -1)
+			char *args[] = {line, NULL};
+			if (execve(line, args, environ) == -1)
 			{
 				perror("./shell");
 				exit(EXIT_FAILURE);
 			}
 		}
+		else if (pid > 0)
+		{
+			waitpid(pid, &status, 0):
+		}
 		else
-			wait(&status);
+		{
+			perror("fork");
+		}
 	}
-	return (0);
+
+	free(line);
+	return 0;
 }
