@@ -1,61 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
-/**
- * main - simple shell
- * Return: 0
- */
 extern char **environ;
+
 int main(void)
 {
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t read;
-	pid_t pid;
-	int status;
-	
-	while (1)
-	{
-		printf("#cisfun$ ");
-		fflush(stdout);
+    ssize_t nread;
+    size_t len = 0;
+    char *line = NULL;
+    pid_t pid;
+    int status;
 
-		read = getline(&line, &len, stdin);
-		if (read == -1)
-		{
-			printf("\n");
-			break;
-		}
+    while (1)
+    {
+        printf("#cisfun$ ");
+        nread = getline(&line, &len, stdin);
 
-		if (line[read - 1] == '\n')
-			line[read - 1] = '\0';
+        if (nread == -1) /* EOF or error */
+        {
+            putchar('\n');
+            break;
+        }
 
-		pid = fork();
-		if (pid == 0)
-		{
-			char *args[2];
-			args[0] = line;
-			args[1] = NULL;
+        if (line[nread - 1] == '\n')
+            line[nread - 1] = '\0';
 
-			if (execve(line, args, environ) == -1)
-			{
-				perror("./shell");
-				exit(EXIT_FAILURE);
-			}
-		}
-		else if (pid > 0)
-		{
-			waitpid(pid, &status, 0);
-		}
-		else
-		{
-			perror("fork");
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	free(line);
-	return (0);
+        pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            free(line);
+            exit(EXIT_FAILURE);
+        }
+        if (pid == 0) /* child */
+        {
+            char *args[2];
+            args[0] = line;
+            args[1] = NULL;
+            execve(args[0], args, environ);
+            /* if execve fails */
+            perror("./shell");
+            free(line);
+            exit(EXIT_FAILURE);
+        }
+        else /* parent */
+        {
+            waitpid(pid, &status, 0);
+        }
+    }
+    free(line);
+    return (0);
 }
