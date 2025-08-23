@@ -13,9 +13,8 @@ int main(void)
 {
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t nread;
+	ssize_t read;
 	pid_t pid;
-	char *argv[2];
 	int status;
 	
 	while (1)
@@ -36,7 +35,10 @@ int main(void)
 		pid = fork();
 		if (pid == 0)
 		{
-			char *args[] = {line, NULL};
+			char *args[2];
+			args[0] = line;
+			args[1] = NULL;
+
 			if (execve(line, args, environ) == -1)
 			{
 				perror("./shell");
@@ -45,14 +47,15 @@ int main(void)
 		}
 		else if (pid > 0)
 		{
-			waitpid(pid, &status, 0):
+			waitpid(pid, &status, 0);
 		}
 		else
 		{
 			perror("fork");
+			exit(EXIT_FAILURE);
 		}
 	}
 
 	free(line);
-	return 0;
+	return (0);
 }
