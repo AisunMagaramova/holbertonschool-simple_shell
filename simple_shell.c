@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -18,13 +17,18 @@ int main(void)
 
     while (1)
     {
-
         if (fgets(input, MAX_INPUT, stdin) == NULL)
             break;
 
         len = strlen(input);
         if (len > 0 && input[len - 1] == '\n')
             input[len - 1] = '\0';
+
+        while (len > 0 && (input[len - 1] == ' ' || input[len - 1] == '\t'))
+        {
+            input[len - 1] = '\0';
+            len--;
+        }
 
         argv[0] = input;
         argv[1] = NULL;
