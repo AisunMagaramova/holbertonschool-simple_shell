@@ -1,67 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
+#include "shell.h"
 
-/* environ global dəyişəni */
-extern char **environ;
-
-#define MAX_INPUT 1024
-
-int main(void)
+/**
+ * main - Entry point for the simple shell
+ * @ac: Argument count
+ * @av: Argument vector
+ *
+ * Return: Always 0 (Success)
+ */
+int main(int ac, char **av)
 {
-    char input[MAX_INPUT];
-    pid_t pid;
-    int status;
+    (void)ac;
+    (void)av;
 
-    while (1)
-    {
-        /* Prompt */
-        printf("$ ");
-        fflush(stdout);
+    prompt_loop();
 
-        /* Komandayı oxu */
-        if (fgets(input, MAX_INPUT, stdin) == NULL)
-        {
-            /* Ctrl+D emalı: boş sətirdən çıx */
-            printf("\n");
-            break;
-        }
-
-        /* Yeni sətir simvolunu sil */
-        size_t len = strlen(input);
-        if (len > 0 && input[len - 1] == '\n')
-            input[len - 1] = '\0';
-
-        /* Əgər boş sətirdirsə, dövrə davam et */
-        if (input[0] == '\0')
-            continue;
-
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-
-        if (pid == 0)
-        {
-            /* Child: execve ilə komandayı işlədir */
-            char *argv[] = {input, NULL};
-
-            if (execve(input, argv, environ) == -1)
-            {
-                perror("Error");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            /* Parent: child prosesin bitməsini gözləyir */
-            waitpid(pid, &status, 0);
-        }
-    }
-
-    return 0;
+    return (0);
 }

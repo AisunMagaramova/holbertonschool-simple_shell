@@ -12,21 +12,19 @@ extern char **environ;
 int main(void)
 {
 	char input[MAX_INPUT];
+	char *argv[2];
 	pid_t pid;
 	int status;
-	char *argv[2];
 	size_t len;
 
 	while (1)
 	{
-		/* Yalnız interaktiv rejimdə prompt göstər */
 		if (isatty(STDIN_FILENO))
 		{
 			printf("$ ");
 			fflush(stdout);
 		}
 
-		/* İstifadəçi girişini oxu */
 		if (fgets(input, MAX_INPUT, stdin) == NULL)
 		{
 			if (isatty(STDIN_FILENO))
@@ -34,12 +32,10 @@ int main(void)
 			break;
 		}
 
-		/* Yeni sətrin (\n) silinməsi */
 		len = strlen(input);
 		if (len > 0 && input[len - 1] == '\n')
 			input[len - 1] = '\0';
 
-		/* Boş daxilolmanı keç */
 		if (input[0] == '\0')
 			continue;
 
@@ -56,7 +52,7 @@ int main(void)
 
 			if (execve(argv[0], argv, environ) == -1)
 			{
-				perror("execve");
+				perror("./hsh");
 				exit(EXIT_FAILURE);
 			}
 		}
