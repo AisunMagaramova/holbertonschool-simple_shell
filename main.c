@@ -1,54 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
 extern char **environ;
 
+#define MAX_INPUT 1024
+
 int main(void)
 {
-    ssize_t nread;
-    size_t len = 0;
-    char *line = NULL;
+    char input[MAX_INPUT];
+    char *newline;
     pid_t pid;
     int status;
 
     while (1)
-{
-    printf("#cisfun$ ");
-    nread = getline(&line, &len, stdin);
-    if (nread == -1)  // EOF və ya error
     {
-        printf("\n");
-        free(line);
-        exit(EXIT_SUCCESS);
-    }
+        printf("$ ");  /* Prompt */
 
-    if (line[nread - 1] == '\n')
-        line[nread - 1] = '\0';
-
-    if (strlen(line) == 0)
-        continue;  // boş sətir olduqda promptu yenidən göstər
-
-    pid = fork();
-    if (pid == -1)
-    {
-        perror("fork");
-        free(line);
-        exit(EXIT_FAILURE);
-    }
-    if (pid == 0)
-    {
-        char *args[] = {line, NULL};
-        if (execve(args[0], args, environ) == -1)
+        if (fgets(input, MAX_INPUT, stdin) == NULL)
         {
-            perror("./shell");
-            free(line);
+            /* Handle Ctrl+D */
+            printf("\n");
+            break;
+        }
+
+        newline = strchr(input, '\n');
+        if (newline)
+            *newline = '\0';
+
+        if (strlen(input) == 0)
+            continue;
+
+        pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            continue;
+        }
+
+        if (pid == 0)
+        {
+            char *argv[2];
+            argv[0] = input;
+            argv[1] = NULL;
+
+            if (execve(input, argv, environ) == -1)
+            {
+                perror("Error");
+            }
             exit(EXIT_FAILURE);
         }
+        else
+        {
+            waitpid(pid, &status, 0);
+        }
     }
-    else
-    {
-        waitpid(pid, &status, 0);
-    }
+
+    return 0;
 }
