@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
+#include <string.h>
 #include <sys/wait.h>
 
 #define MAX_INPUT 1024
 
-extern char **environ;
-
+/**
+ * main - Entry point for the simple shell
+ *
+ * Return: Always 0 (Success)
+ */
 int main(void)
 {
 	char input[MAX_INPUT];
@@ -19,19 +21,14 @@ int main(void)
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-		{
-			printf("$ ");
-			fflush(stdout);
-		}
-
 		if (fgets(input, MAX_INPUT, stdin) == NULL)
 		{
-			if (isatty(STDIN_FILENO))
-				printf("\n");
+			/* Handle Ctrl+D (EOF) */
+			write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
 
+		/* Remove newline character */
 		len = strlen(input);
 		if (len > 0 && input[len - 1] == '\n')
 			input[len - 1] = '\0';
@@ -50,9 +47,9 @@ int main(void)
 			argv[0] = input;
 			argv[1] = NULL;
 
-			if (execve(argv[0], argv, environ) == -1)
+			if (execve(argv[0], argv, NULL) == -1)
 			{
-				perror("./hsh");
+				perror("execve");
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -62,5 +59,5 @@ int main(void)
 		}
 	}
 
-	return 0;
+	return (0);
 }
