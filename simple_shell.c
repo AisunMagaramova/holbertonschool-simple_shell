@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/wait.h>
 
-/* environ global dəyişəni */
 extern char **environ;
 
 #define MAX_INPUT 1024
@@ -14,27 +13,24 @@ int main(void)
     char input[MAX_INPUT];
     pid_t pid;
     int status;
+    size_t len;
+    char *argv[2];
 
     while (1)
     {
-        /* Prompt */
         printf("$ ");
         fflush(stdout);
 
-        /* Komandayı oxu */
         if (fgets(input, MAX_INPUT, stdin) == NULL)
         {
-            /* Ctrl+D emalı: boş sətirdən çıx */
             printf("\n");
             break;
         }
 
-        /* Yeni sətir simvolunu sil */
-        size_t len = strlen(input);
+        len = strlen(input);
         if (len > 0 && input[len - 1] == '\n')
             input[len - 1] = '\0';
 
-        /* Əgər boş sətirdirsə, dövrə davam et */
         if (input[0] == '\0')
             continue;
 
@@ -47,8 +43,8 @@ int main(void)
 
         if (pid == 0)
         {
-            /* Child: execve ilə komandayı işlədir */
-            char *argv[] = {input, NULL};
+            argv[0] = input;
+            argv[1] = NULL;
 
             if (execve(input, argv, environ) == -1)
             {
@@ -58,7 +54,6 @@ int main(void)
         }
         else
         {
-            /* Parent: child prosesin bitməsini gözləyir */
             waitpid(pid, &status, 0);
         }
     }
