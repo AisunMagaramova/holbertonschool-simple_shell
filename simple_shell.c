@@ -18,20 +18,27 @@ int main(void)
 
     while (1)
     {
-        printf("$ ");
-        fflush(stdout);
+        /* Yalnız terminaldan daxil olduqda prompt göstər */
+        if (isatty(STDIN_FILENO))
+        {
+            printf("$ ");
+            fflush(stdout);
+        }
 
         if (fgets(input, MAX_INPUT, stdin) == NULL)
         {
-            printf("\n");
+            /* Ctrl+D basıldıqda çıxış */
+            if (isatty(STDIN_FILENO))
+                printf("\n");
             break;
         }
 
+        /* Yeni sətri sil */
         len = strlen(input);
         if (len > 0 && input[len - 1] == '\n')
             input[len - 1] = '\0';
 
-        if (input[0] == '\0')
+        if (input[0] == '\0')  /* boş sətir, keç */
             continue;
 
         pid = fork();
@@ -43,6 +50,7 @@ int main(void)
 
         if (pid == 0)
         {
+            /* Child prosesi: execve ilə işlət */
             argv[0] = input;
             argv[1] = NULL;
 
@@ -54,6 +62,7 @@ int main(void)
         }
         else
         {
+            /* Parent: child-ı gözləyir */
             waitpid(pid, &status, 0);
         }
     }
