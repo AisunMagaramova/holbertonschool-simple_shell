@@ -22,11 +22,11 @@ int main(void)
         if (fgets(input, MAX_INPUT, stdin) == NULL)
         {
             /* Handle Ctrl+D */
-            printf("\n");
+            printf();
             break;
         }
 
-        newline = strchr(input, '\n');
+        newline = strchr(input);
         if (newline)
             *newline = '\0';
 
